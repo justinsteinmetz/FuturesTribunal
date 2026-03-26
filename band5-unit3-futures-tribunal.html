@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futures Tribunal · Band 5 Unit 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Syne+Mono&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#030508;--deep:#060a12;--panel:#0b1120;--raised:#101828;--lift:#151f35;
+  --text:#d8e8f8;--mid:#5a7090;--muted:#1e3050;--ghost:#8aa8c4;
+  --will:#38bdf8;--will-dim:rgba(56,189,248,0.10);--will-b:rgba(56,189,248,0.3);--will-glow:rgba(56,189,248,0.15);
+  --going:#a78bfa;--going-dim:rgba(167,139,250,0.10);--going-b:rgba(167,139,250,0.3);--going-glow:rgba(167,139,250,0.15);
+  --prog:#34d399;--prog-dim:rgba(52,211,153,0.10);--prog-b:rgba(52,211,153,0.3);--prog-glow:rgba(52,211,153,0.15);
+  --spon:#fb923c;--spon-dim:rgba(251,146,60,0.10);--spon-b:rgba(251,146,60,0.3);--spon-glow:rgba(251,146,60,0.15);
+  --gold:#fbbf24;--gold-dim:rgba(251,191,36,0.12);--gold-b:rgba(251,191,36,0.3);
+  --good:#34d399;--good-dim:rgba(52,211,153,0.10);--good-b:rgba(52,211,153,0.3);
+  --bad:#f87171;--bad-dim:rgba(248,113,113,0.10);--bad-b:rgba(248,113,113,0.3);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--void);font-family:'Inter',sans-serif;font-weight:300;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+
+/* STAR CANVAS */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* AURORA */
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 20% 20%,rgba(56,189,248,0.04) 0,transparent 50%),
+    radial-gradient(ellipse at 80% 80%,rgba(167,139,250,0.05) 0,transparent 50%),
+    radial-gradient(ellipse at 50% 100%,rgba(52,211,153,0.03) 0,transparent 40%);
+}
+
+.screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:28px 16px 52px;width:100%;max-width:720px;position:relative;z-index:1;text-align:center}
+.screen.active{display:flex}
+@keyframes materialize{from{opacity:0;transform:scale(0.97) translateY(12px)}to{opacity:1;transform:none}}
+.screen.active{animation:materialize .4s ease}
+
+/* ── INTRO ── */
+.orbital{position:relative;width:96px;height:96px;margin:0 auto 20px}
+.orbital-ring{position:absolute;inset:0;border-radius:50%;border:2px solid;animation:orbit 4s linear infinite}
+.orbital-ring:nth-child(1){border-color:rgba(56,189,248,0.4);animation-duration:4s}
+.orbital-ring:nth-child(2){border-color:rgba(167,139,250,0.3);inset:8px;animation-duration:6s;animation-direction:reverse}
+.orbital-core{position:absolute;inset:28px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,0.3),rgba(167,139,250,0.2));display:flex;align-items:center;justify-content:center;font-size:24px}
+@keyframes orbit{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+.tribunal-tag{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--mid);margin-bottom:12px}
+.game-title{
+  font-family:'Syne',sans-serif;font-size:clamp(52px,13vw,88px);font-weight:800;
+  line-height:.95;letter-spacing:-0.03em;margin-bottom:6px;
+  background:linear-gradient(135deg,var(--will) 0%,var(--going) 40%,var(--prog) 70%,var(--spon) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(56,189,248,0.12));
+}
+.game-sub{font-family:'Syne Mono',monospace;font-size:11px;color:var(--mid);letter-spacing:0.14em;margin-bottom:32px}
+
+/* FOUR FUTURES REFERENCE */
+.futures-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:28px}
+.fc{padding:14px 16px;border:1px solid;border-radius:8px;text-align:left;position:relative;overflow:hidden;transition:transform .2s}
+.fc::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s}
+.fc:hover{transform:translateY(-2px)}
+.fc:hover::after{opacity:1}
+.fc.will{border-color:var(--will-b);background:var(--will-dim)}
+.fc.will::after{background:radial-gradient(ellipse at 0% 0%,var(--will-glow),transparent)}
+.fc.going{border-color:var(--going-b);background:var(--going-dim)}
+.fc.going::after{background:radial-gradient(ellipse at 0% 0%,var(--going-glow),transparent)}
+.fc.prog{border-color:var(--prog-b);background:var(--prog-dim)}
+.fc.prog::after{background:radial-gradient(ellipse at 0% 0%,var(--prog-glow),transparent)}
+.fc.spon{border-color:var(--spon-b);background:var(--spon-dim)}
+.fc.spon::after{background:radial-gradient(ellipse at 0% 0%,var(--spon-glow),transparent)}
+.fc-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px;position:relative;z-index:1}
+.fc.will .fc-name{color:var(--will)}.fc.going .fc-name{color:var(--going)}.fc.prog .fc-name{color:var(--prog)}.fc.spon .fc-name{color:var(--spon)}
+.fc-rule{font-size:12px;color:var(--mid);line-height:1.4;position:relative;z-index:1}
+.fc-ex{font-size:11px;color:var(--muted);font-style:italic;margin-top:3px;font-family:'Syne Mono',monospace;position:relative;z-index:1}
+
+.btn-launch{
+  background:linear-gradient(135deg,var(--will),var(--going));color:white;
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:700;
+  padding:15px 52px;border:none;border-radius:8px;cursor:pointer;
+  box-shadow:0 0 40px rgba(56,189,248,0.2),0 5px 20px rgba(0,0,0,0.4);
+  transition:all .15s;margin-bottom:8px;
+}
+.btn-launch:hover{transform:translateY(-2px);box-shadow:0 0 60px rgba(56,189,248,0.3),0 8px 28px rgba(0,0,0,0.45)}
+.btn-launch:active{transform:translateY(2px)}
+.btn-skip-s{background:none;border:none;color:var(--muted);font-family:'Syne Mono',monospace;font-size:11px;cursor:pointer;text-decoration:underline}
+
+/* ── GAME ── */
+.game-wrap{width:100%;max-width:700px}
+
+.hud{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hud-score{font-family:'Syne Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:0.1em}
+.hud-round{font-family:'Syne Mono',monospace;font-size:11px;color:var(--mid);letter-spacing:0.06em}
+
+.scan{height:3px;background:rgba(255,255,255,0.05);margin-bottom:22px;overflow:hidden;border-radius:2px}
+.scan-fill{height:100%;background:linear-gradient(90deg,var(--will),var(--going),var(--prog),var(--spon));transition:width .5s ease;border-radius:2px}
+
+/* CONTEXT CARD — cinematic */
+.context-card{
+  background:var(--panel);border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,0.4);
+  transition:box-shadow .3s;
+}
+.context-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--will),var(--going),var(--prog),var(--spon));
+}
+.context-card.glow-will{box-shadow:0 8px 40px rgba(0,0,0,0.3),0 0 0 1px var(--will-b),0 0 30px var(--will-glow)}
+.context-card.glow-going{box-shadow:0 8px 40px rgba(0,0,0,0.3),0 0 0 1px var(--going-b),0 0 30px var(--going-glow)}
+.context-card.glow-prog{box-shadow:0 8px 40px rgba(0,0,0,0.3),0 0 0 1px var(--prog-b),0 0 30px var(--prog-glow)}
+.context-card.glow-spon{box-shadow:0 8px 40px rgba(0,0,0,0.3),0 0 0 1px var(--spon-b),0 0 30px var(--spon-glow)}
+.ctx-label{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.ctx-context{font-size:14px;color:var(--mid);line-height:1.6;margin-bottom:10px;font-style:italic}
+.ctx-sent{font-family:'Syne',sans-serif;font-size:clamp(17px,3.5vw,22px);font-weight:700;color:var(--text);line-height:1.4}
+
+/* FUTURE BUTTONS — 2x2 grid with glow on hover */
+.future-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.fbt{
+  padding:16px 10px;border:1px solid;border-radius:8px;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;text-align:center;line-height:1.4;position:relative;overflow:hidden;
+}
+.fbt small{display:block;font-size:10px;font-family:'Syne Mono',monospace;font-weight:400;margin-top:3px;opacity:.7}
+.fbt::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s}
+.fbt:hover{transform:translateY(-2px)}
+.fbt:hover::after{opacity:1}
+.fbt.will{border-color:var(--will-b);color:var(--will);background:var(--will-dim)}
+.fbt.will::after{background:radial-gradient(ellipse at 50% 100%,var(--will-glow),transparent 70%)}
+.fbt.going{border-color:var(--going-b);color:var(--going);background:var(--going-dim)}
+.fbt.going::after{background:radial-gradient(ellipse at 50% 100%,var(--going-glow),transparent 70%)}
+.fbt.prog{border-color:var(--prog-b);color:var(--prog);background:var(--prog-dim)}
+.fbt.prog::after{background:radial-gradient(ellipse at 50% 100%,var(--prog-glow),transparent 70%)}
+.fbt.spon{border-color:var(--spon-b);color:var(--spon);background:var(--spon-dim)}
+.fbt.spon::after{background:radial-gradient(ellipse at 50% 100%,var(--spon-glow),transparent 70%)}
+.fbt.locked-correct{animation:lockCorrect .4s ease forwards}
+@keyframes lockCorrect{0%{filter:brightness(1)}50%{filter:brightness(1.6)}100%{filter:brightness(1.3);box-shadow:0 0 20px currentColor}}
+.fbt.locked-wrong{opacity:0.2;filter:grayscale(1)}
+
+/* REASON PANEL */
+.reason-panel{background:var(--panel);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:16px 18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.reason-label{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.reason-opts{display:flex;flex-direction:column;gap:7px}
+.ropt{background:var(--raised);border:1px solid rgba(255,255,255,0.06);color:var(--mid);font-size:13px;padding:11px 14px;text-align:left;border-radius:6px;cursor:pointer;transition:all .18s;line-height:1.5}
+.ropt:hover{border-color:rgba(255,255,255,0.12);color:var(--text);background:var(--lift)}
+.ropt.selected{border-color:var(--gold-b);color:var(--gold);background:var(--gold-dim)}
+.ropt.correct{border-color:var(--good-b);color:var(--good);background:var(--good-dim)}
+.ropt.wrong{border-color:var(--bad-b);color:var(--bad);background:var(--bad-dim)}
+
+/* SIGNAL */
+.signal{padding:12px 16px;font-size:13px;line-height:1.6;display:none;margin-bottom:12px;border-radius:6px}
+.signal.show{display:block;animation:signalIn .25s ease}
+@keyframes signalIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.signal.correct{background:var(--good-dim);border-left:3px solid var(--good);color:var(--good)}
+.signal.partial{background:var(--gold-dim);border-left:3px solid var(--gold);color:var(--gold)}
+.signal.wrong{background:var(--bad-dim);border-left:3px solid var(--bad);color:var(--bad)}
+.sig-explain{font-size:11px;margin-top:5px;opacity:.8;color:var(--mid);font-family:'Syne Mono',monospace}
+
+.ctrl{display:flex;gap:8px}
+.confirm-btn{flex:1;background:linear-gradient(135deg,var(--will),var(--going));color:white;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;padding:13px;border:none;border-radius:6px;cursor:pointer;display:none;transition:opacity .2s,transform .1s;box-shadow:0 4px 20px rgba(56,189,248,0.2)}
+.confirm-btn:hover{opacity:.9;transform:translateY(-1px)}
+.advance-btn{flex:1;background:var(--panel);border:1px solid rgba(255,255,255,0.1);color:var(--mid);font-family:'Syne',sans-serif;font-size:16px;font-weight:700;padding:13px;border-radius:6px;cursor:pointer;display:none;transition:all .2s}
+.advance-btn:hover{border-color:var(--gold-b);color:var(--gold)}
+
+/* ── RESULTS ── */
+.result-cosmos{font-size:80px;margin-bottom:8px;animation:cosmicLand .5s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes cosmicLand{from{transform:scale(0) rotate(-30deg)}to{transform:scale(1) rotate(0)}}
+.final-pts{
+  font-family:'Syne',sans-serif;font-size:96px;font-weight:800;line-height:1;
+  background:linear-gradient(135deg,var(--will),var(--prog));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 30px rgba(56,189,248,0.2));
+}
+.final-denom{font-family:'Syne Mono',monospace;font-size:12px;color:var(--mid);margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase}
+.transmission{
+  background:var(--panel);border:1px solid rgba(255,255,255,0.06);
+  border-left:3px solid var(--will);padding:16px 20px;
+  margin:14px 0 22px;font-size:14px;color:var(--text);text-align:left;line-height:1.6;
+  border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+.mission-log{width:100%;max-height:44vh;overflow-y:auto;margin-bottom:22px;display:flex;flex-direction:column;gap:6px}
+.log-entry{background:var(--panel);border:1px solid rgba(255,255,255,0.05);padding:10px 14px;border-radius:6px;text-align:left}
+.log-ctx{font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:3px}
+.log-sent{font-size:13px;color:var(--text);font-weight:500}
+.log-choice{font-size:11px;margin-top:3px;font-family:'Syne Mono',monospace}
+.log-explain{font-size:11px;color:var(--mid);margin-top:3px;font-style:italic;font-family:'Syne Mono',monospace}
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+<div class="aurora"></div>
+
+<div class="screen active" id="intro">
+  <div class="orbital">
+    <div class="orbital-ring"></div>
+    <div class="orbital-ring"></div>
+    <div class="orbital-core">🌌</div>
+  </div>
+  <div class="tribunal-tag">Band 5 · Unit 3 · Big dreams, small steps</div>
+  <div class="game-title">Futures<br>Tribunal</div>
+  <div class="game-sub">FOUR FUTURE FORMS // IDENTIFY + JUSTIFY</div>
+  <div class="futures-grid">
+    <div class="fc will"><div class="fc-name">will</div><div class="fc-rule">Predictions, decisions at moment of speaking</div><div class="fc-ex">"It will rain tomorrow."</div></div>
+    <div class="fc going"><div class="fc-name">going to</div><div class="fc-rule">Pre-decided plans and intentions</div><div class="fc-ex">"I'm going to study medicine."</div></div>
+    <div class="fc prog"><div class="fc-name">present progressive</div><div class="fc-rule">Fixed, confirmed arrangements</div><div class="fc-ex">"We're meeting at 3pm."</div></div>
+    <div class="fc spon"><div class="fc-name">will (spontaneous)</div><div class="fc-rule">Instant decisions, offers, promises</div><div class="fc-ex">"I'll carry that for you."</div></div>
+  </div>
+  <button class="btn-launch" onclick="startGame()">Enter the Tribunal</button>
+  <button class="btn-skip-s" onclick="startGame()">skip intro</button>
+</div>
+
+<div class="screen" id="game">
+  <div class="game-wrap">
+    <div class="hud">
+      <div class="hud-score">SCORE: <span id="scoreVal">0</span></div>
+      <div class="hud-round">ROUND <span id="roundVal">1</span> / 12</div>
+    </div>
+    <div class="scan"><div class="scan-fill" id="scanFill" style="width:0%"></div></div>
+
+    <div class="context-card" id="ctxCard">
+      <div class="ctx-label">Context</div>
+      <div class="ctx-context" id="ctxText"></div>
+      <div class="ctx-sent" id="ctxSent"></div>
+    </div>
+
+    <div class="future-grid">
+      <button class="fbt will"  id="fb0" onclick="selectFuture(0)">will<small>prediction / instant decision</small></button>
+      <button class="fbt going" id="fb1" onclick="selectFuture(1)">going to<small>plan / intention</small></button>
+      <button class="fbt prog"  id="fb2" onclick="selectFuture(2)">present progressive<small>fixed arrangement</small></button>
+      <button class="fbt spon"  id="fb3" onclick="selectFuture(3)">will (spontaneous)<small>offer / promise</small></button>
+    </div>
+
+    <div class="reason-panel" id="reasonPanel" style="display:none">
+      <div class="reason-label">Justify your verdict</div>
+      <div class="reason-opts" id="reasonOpts"></div>
+    </div>
+
+    <div class="signal" id="signal"><span id="sigText"></span><div class="sig-explain" id="sigExplain"></div></div>
+
+    <div class="ctrl">
+      <button class="confirm-btn" id="confirmBtn" onclick="confirmReason()">Confirm reason</button>
+      <button class="advance-btn" id="advanceBtn" onclick="nextRound()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="results">
+  <div class="result-cosmos" id="resCosmos">🌌</div>
+  <div class="final-pts" id="finalPts"></div>
+  <div class="final-denom">OUT OF 24 POINTS</div>
+  <div class="transmission" id="transmission"></div>
+  <div class="mission-log" id="missionLog"></div>
+  <button class="btn-launch" onclick="startGame()">Retry mission</button>
+</div>
+
+<script>
+// STAR FIELD
+(function(){
+  const canvas=document.getElementById('starfield');
+  const ctx=canvas.getContext('2d');
+  let stars=[];
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;stars=Array.from({length:180},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+.3,o:Math.random()*.7+.1,speed:Math.random()*.15+.05}))}
+  function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.o})`;ctx.fill();s.o+=Math.sin(Date.now()*s.speed*.001)*.003})}
+  window.addEventListener('resize',resize);resize();
+  setInterval(draw,50);
+})();
+
+// 0=will prediction, 1=going to, 2=present progressive, 3=will spontaneous
+const ROUNDS=[
+  {ctx:"Maya has just seen the weather forecast.",sent:"It will snow in the mountains this weekend.",type:0,reasons:[{t:"It's a prediction based on evidence — the weather forecast.",c:true},{t:"It's a fixed arrangement already booked.",c:false},{t:"She just decided this spontaneously.",c:false}],explain:"Will for predictions — especially when based on evidence."},
+  {ctx:"Tom has been training every day for six months.",sent:"He's going to compete in the national championships.",type:1,reasons:[{t:"It's a pre-decided plan or intention — he's been working towards this.",c:true},{t:"He just decided this while speaking.",c:false},{t:"It's a confirmed booking in his diary.",c:false}],explain:"Going to for pre-decided plans and intentions."},
+  {ctx:"Leila checks her phone and sees a message from her coach.",sent:"We're training at 6am on Thursday.",type:2,reasons:[{t:"It's a fixed, confirmed arrangement — already scheduled.",c:true},{t:"She just decided this spontaneously.",c:false},{t:"It's a prediction about the future.",c:false}],explain:"Present progressive for fixed, confirmed future arrangements."},
+  {ctx:"A friend asks if anyone can help carry the equipment.",sent:"I'll carry the bags — no problem.",type:3,reasons:[{t:"It's a spontaneous offer — decided at the exact moment of speaking.",c:true},{t:"This was already planned before the conversation.",c:false},{t:"It's a prediction about the future.",c:false}],explain:"Will for spontaneous decisions or offers made right now."},
+  {ctx:"Scientists are analysing climate data from the past 50 years.",sent:"Temperatures will rise by 2 degrees by 2050.",type:0,reasons:[{t:"It's a prediction based on current evidence — the data.",c:true},{t:"It's a fixed arrangement in a scientist's diary.",c:false},{t:"A scientist just decided this while speaking.",c:false}],explain:"Will for predictions, especially with evidence."},
+  {ctx:"Sam looks at the dark sky and says:",sent:"It's going to rain. Look at those clouds.",type:1,reasons:[{t:"It's a prediction based on visible, present evidence — the clouds.",c:true},{t:"It's a fixed arrangement in Sam's diary.",c:false},{t:"Sam just decided this spontaneously.",c:false}],explain:"Going to also works for predictions with direct, visible evidence."},
+  {ctx:"Hana has been accepted to study abroad next year.",sent:"She's flying to New York on the 15th of September.",type:2,reasons:[{t:"The flight is booked — it's a fixed, confirmed arrangement.",c:true},{t:"She just decided to fly while speaking.",c:false},{t:"It's a prediction about what might happen.",c:false}],explain:"Present progressive for already arranged and confirmed events."},
+  {ctx:"Someone left a coffee cup on the table. A friend notices.",sent:"I'll take it back to the kitchen.",type:3,reasons:[{t:"It's a spontaneous offer or decision made at that exact moment.",c:true},{t:"This was already planned before entering the room.",c:false},{t:"It's a prediction about the future.",c:false}],explain:"Will for instant, spontaneous decisions — not pre-planned."},
+  {ctx:"After years of saving, Kofi makes an announcement.",sent:"I'm going to start my own business next year.",type:1,reasons:[{t:"It's a pre-decided intention — he's been planning and saving for this.",c:true},{t:"He just decided this while speaking.",c:false},{t:"It's a fixed confirmed booking already in his diary.",c:false}],explain:"Going to for plans and intentions decided before this moment."},
+  {ctx:"The phone rings during dinner.",sent:"I'll get it!",type:3,reasons:[{t:"It's a spontaneous decision made at the exact moment the phone rang.",c:true},{t:"Answering the phone was already arranged in advance.",c:false},{t:"It's a prediction about who might be calling.",c:false}],explain:"Will for instant spontaneous decisions — the classic example."},
+  {ctx:"The school has confirmed the schedule for next Friday's science fair.",sent:"Our class is presenting at 2pm on Friday.",type:2,reasons:[{t:"It's a confirmed, scheduled arrangement — already in the calendar.",c:true},{t:"They just decided this spontaneously.",c:false},{t:"It's a prediction about what might happen.",c:false}],explain:"Present progressive for fixed, confirmed future arrangements."},
+  {ctx:"A journalist asks an athlete about the upcoming Olympics.",sent:"I think she'll win gold at the next Olympics.",type:0,reasons:[{t:"It's a prediction or opinion about the future — not a fixed plan.",c:true},{t:"Winning gold is a plan the athlete already decided.",c:false},{t:"The gold medal is a fixed arrangement already in the diary.",c:false}],explain:"Will for predictions — especially with 'I think', 'probably', 'maybe'."}
+];
+const TYPE_LABELS=['will (prediction)','going to','present progressive','will (spontaneous)'];
+const TYPE_GLOWS=['glow-will','glow-going','glow-prog','glow-spon'];
+const TYPE_CLASSES=['will','going','prog','spon'];
+
+let rounds,current,score,selFuture,selReasonIdx,answered,reviewItems;
+
+function shuffle(a){return[...a].sort(()=>Math.random()-0.5)}
+function setScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+
+function startGame(){
+  rounds=shuffle(ROUNDS);current=0;score=0;selFuture=null;selReasonIdx=null;answered=false;reviewItems=[];
+  setScreen('game');loadRound();
+}
+
+function loadRound(){
+  const r=rounds[current];
+  selFuture=null;selReasonIdx=null;answered=false;
+  document.getElementById('ctxText').textContent=r.ctx;
+  document.getElementById('ctxSent').textContent=r.sent;
+  document.getElementById('ctxCard').className='context-card';
+  TYPE_CLASSES.forEach((c,i)=>document.getElementById('fb'+i).className='fbt '+c);
+  document.getElementById('reasonPanel').style.display='none';
+  document.getElementById('signal').className='signal';
+  document.getElementById('confirmBtn').style.display='none';
+  document.getElementById('advanceBtn').style.display='none';
+  document.getElementById('scanFill').style.width=(current/rounds.length*100)+'%';
+  document.getElementById('scoreVal').textContent=score;
+  document.getElementById('roundVal').textContent=current+1;
+}
+
+function selectFuture(idx){
+  if(answered)return;
+  const r=rounds[current];
+  selFuture=idx;
+  const correct=idx===r.type;
+  TYPE_CLASSES.forEach((c,i)=>document.getElementById('fb'+i).className='fbt '+c);
+  if(correct){
+    score++;
+    document.getElementById('fb'+idx).className+=' locked-correct';
+    document.getElementById('ctxCard').className='context-card '+TYPE_GLOWS[idx];
+    const shuffled=shuffle(r.reasons.map(rs=>({t:rs.t,c:rs.c})));
+    rounds[current]._sr=shuffled;
+    document.getElementById('reasonOpts').innerHTML=shuffled.map((rs,i)=>`<button class="ropt" onclick="pickReason(${i},this)">${rs.t}</button>`).join('');
+    document.getElementById('reasonPanel').style.display='block';
+    document.getElementById('confirmBtn').style.display='block';
+  } else {
+    answered=true;
+    document.getElementById('fb'+idx).className+=' locked-wrong';
+    document.getElementById('fb'+r.type).className+=' locked-correct';
+    const sig=document.getElementById('signal');
+    sig.className='signal wrong show';
+    document.getElementById('sigText').textContent=`✗ That's ${TYPE_LABELS[idx]} — but this context needs ${TYPE_LABELS[r.type]}.`;
+    document.getElementById('sigExplain').textContent=r.explain;
+    document.getElementById('advanceBtn').style.display='block';
+    reviewItems.push({ctx:r.ctx,sent:r.sent,formOk:false,reasonOk:false,explain:r.explain,chosen:TYPE_LABELS[idx],correct:TYPE_LABELS[r.type]});
+  }
+  document.getElementById('scoreVal').textContent=score;
+}
+
+function pickReason(idx,btn){
+  if(answered)return;
+  document.querySelectorAll('.ropt').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selReasonIdx=idx;
+}
+
+function confirmReason(){
+  if(answered||selReasonIdx===null)return;
+  answered=true;
+  const r=rounds[current];
+  const sr=r._sr[selReasonIdx];
+  document.getElementById('confirmBtn').style.display='none';
+  document.getElementById('advanceBtn').style.display='block';
+  document.querySelectorAll('.ropt').forEach((btn,i)=>{
+    if(r._sr[i].c)btn.className='ropt correct';
+    else if(i===selReasonIdx)btn.className='ropt wrong';
+  });
+  const sig=document.getElementById('signal');
+  if(sr.c){
+    score++;
+    sig.className='signal correct show';
+    document.getElementById('sigText').textContent='✓ Correct form and correct reason.';
+    document.getElementById('sigExplain').textContent=r.explain;
+  } else {
+    sig.className='signal partial show';
+    document.getElementById('sigText').textContent='Right form — but that\'s not the best reason.';
+    document.getElementById('sigExplain').textContent=r.explain;
+  }
+  document.getElementById('scoreVal').textContent=score;
+  reviewItems.push({ctx:r.ctx,sent:r.sent,formOk:true,reasonOk:sr.c,explain:r.explain,chosen:null,correct:null});
+}
+
+function nextRound(){
+  current++;
+  if(current>=rounds.length){showResults();return;}
+  loadRound();
+}
+
+function showResults(){
+  const max=rounds.length*2;
+  document.getElementById('finalPts').textContent=score;
+  const pct=score/max;
+  const data=[
+    {c:'🌑',m:'Mission incomplete. Review the four future forms and the contexts that trigger each one.'},
+    {c:'🌒',m:'Partial signal. The reasons are the hardest part — keep thinking about context.'},
+    {c:'🌕',m:'Strong transmission. You understand all four future forms and can justify your choices.'},
+    {c:'✨',m:'Perfect signal. Full command of all four future forms.'}
+  ][pct<0.4?0:pct<0.6?1:pct<1?2:3];
+  document.getElementById('resCosmos').textContent=data.c;
+  document.getElementById('transmission').textContent=data.m;
+  document.getElementById('missionLog').innerHTML=reviewItems.map(i=>`
+    <div class="log-entry">
+      <div class="log-ctx">${i.ctx}</div>
+      <div class="log-sent">${i.sent}</div>
+      ${!i.formOk&&i.chosen?`<div class="log-choice" style="color:var(--bad)">✗ You chose: ${i.chosen} → correct: ${i.correct}</div>`:''}
+      <div class="log-explain">${i.explain}</div>
+    </div>`).join('');
+  setScreen('results');
+}
+</script>
+</body>
+</html>
